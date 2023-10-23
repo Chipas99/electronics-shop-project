@@ -8,7 +8,7 @@ if __name__ == '__main__':
     print(item2.calculate_total_price())  # 100000
 
     # устанавливаем новый уровень цен
-    Item.pay_rate = 0.8
+    Item.discount_rate = 0.8
     # применяем скидку
     item1.apply_discount()
 
