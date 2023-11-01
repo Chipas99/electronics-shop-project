@@ -1,30 +1,42 @@
 import pytest
+import csv
 from src.item import Item
 
-@pytest.fixture(scope="function")
-def setup_items():
-    Item.items = []  # Очищаем список товаров перед каждым тестом
-    yield
-    Item.items = []  # Очищаем список товаров после каждого теста
+@pytest.fixture
+def item():
+    return Item("Test Item", 10.0, 3)
 
-def test_calculate_total_price():
-    item = Item("Товар 1", 10.0, 5)
-    assert item.calculate_total_price() == 50.0
+def test_calculate_total_price(item):
+    assert item.calculate_total_price() == 30.0
 
-def test_apply_discount():
-    item = Item("Товар 1", 10.0, 5)
+def test_apply_discount(item):
     item.apply_discount()
-    assert item.price == 10.0  # Проверяем, что цена товара не изменилась
+    assert item.calculate_total_price() == 30.0  # После применения скидки, общая цена должна остаться такой же
 
-@pytest.mark.parametrize("discount_rate", [0.9, 0.8])
-def test_set_discount_rate(discount_rate):
-    Item.set_discount_rate(discount_rate)
-    assert Item.discount_rate == discount_rate
+def test_set_discount_rate():
+    Item.set_discount_rate(0.9)
+    assert Item.discount_rate == 0.9
 
-def test_get_items(setup_items):
-    item1 = Item("Товар 1", 10.0, 5)
-    item2 = Item("Товар 2", 20.0, 3)
+def test_instantiate_from_csv():
+    # Создайте временный CSV файл для тестов
+    with open('test_items.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['name', 'price', 'quantity'])
+        writer.writerow(['Test Item 1', '10.0', '3'])
+        writer.writerow(['Test Item 2', '20.0', '2'])
+
+    Item.instantiate_from_csv('test_items.csv')
     items = Item.get_items()
     assert len(items) == 2
-    assert item1 in items
-    assert item2 in items
+    assert items[0].name == 'Test Item 1'
+    assert items[1].name == 'Test Item 2'
+
+    # Удалите временный файл после завершения теста
+    import os
+    os.remove('test_items.csv')
+
+def test_string_to_number():
+    assert Item.string_to_number('123') == 123
+    assert Item.string_to_number('12.34') == 12.34
+    with pytest.raises(ValueError):
+        Item.string_to_number('abc')
