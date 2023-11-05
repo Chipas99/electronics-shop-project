@@ -1,4 +1,5 @@
 import csv
+import os.path
 
 class Item:
     """
@@ -65,16 +66,18 @@ class Item:
         cls.discount_rate = discount_rate
 
     @classmethod
-    def instantiate_from_csv(cls):
-        """
-        Инициализирует экземпляры класса Item данными из файла src/items.csv.
-        """
-        with open('src/items.csv', 'r') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                name, price, quantity = row
-                item = Item(name, float(price), int(quantity))
-                cls.all.append(item)
+    def instantiate_from_csv(cls, filename):
+        items = []
+        with open(filename, 'r', encoding='cp1251') as csvfile:
+            csv_reader = csv.reader(csvfile)
+            next(csv_reader)
+            for row in csv_reader:
+                name = row[0]
+                price = float(row[1])
+                quantity = int(row[2])
+                item = cls(name=name, price=price, quantity=quantity)
+                items.append(item)
+        return items
 
     @staticmethod
     def string_to_number(value: str) -> float:
@@ -85,3 +88,5 @@ class Item:
         :return: Число.
         """
         return float(value)
+
+
