@@ -21,6 +21,12 @@ class Item:
         self.quantity = quantity
         Item.all.append(self)
 
+    def __repr__(self):
+        return f"Item('{self.name}', {self.price}, {self.quantity})"
+
+    def __str__(self):
+        return self.name
+
     @property
     def name(self) -> str:
         """
@@ -88,5 +94,7 @@ class Item:
         :return: Число.
         """
         return float(value)
+
+
 
 

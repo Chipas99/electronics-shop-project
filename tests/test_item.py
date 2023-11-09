@@ -40,3 +40,11 @@ def test_string_to_number():
     assert Item.string_to_number('12.34') == 12.34
     with pytest.raises(ValueError):
         Item.string_to_number('abc')
+
+def test_item_repr():
+    item = Item("Тестовый товар", 20.0, 10)
+    assert repr(item) == "Item(name=Тестовый товар, price=20.0, quantity=10)"
+
+def test_item_str():
+    item = Item("Тестовый товар", 20.0, 10)
+    assert str(item) == "Тестовый товар - $20.0 - 10 items"
