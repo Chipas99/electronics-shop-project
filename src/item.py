@@ -89,4 +89,20 @@ class Item:
         """
         return float(value)
 
+    def __repr__(self):
+        return f"Item('{self.name}', {self.price}, {self.quantity})"
+
+    def __str__(self):
+        return self.name
+
+    def __add__(self, other):
+        """
+        Складывает атрибут количество товара (quantity)
+        класса Item и (или) его дочерних классов
+        """
+        if isinstance(other, self.__class__):
+            return self.quantity + other.quantity
+        else:
+            raise ValueError('Складываться должны атрибуты quantity класса Item и (или) его дочерних классов')
+
 

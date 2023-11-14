@@ -17,26 +17,42 @@ def test_set_discount_rate():
     Item.set_discount_rate(0.9)
     assert Item.discount_rate == 0.9
 
-def test_instantiate_from_csv():
-    # Создайте временный CSV файл для тестов
-    with open('test_items.csv', 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['name', 'price', 'quantity'])
-        writer.writerow(['Test Item 1', '10.0', '3'])
-        writer.writerow(['Test Item 2', '20.0', '2'])
+@pytest.fixture
+def sample_csv(tmp_path):
+    csv_content = """Name,Price,Quantity
+                    Item1,10.5,3
+                    Item2,20.0,5
+                    Item3,15.75,2"""
+    csv_file = tmp_path / "sample.csv"
+    csv_file.write_text(csv_content)
+    return csv_file
 
-    Item.instantiate_from_csv('test_items.csv')
-    items = Item.get_items()
-    assert len(items) == 2
-    assert items[0].name == 'Test Item 1'
-    assert items[1].name == 'Test Item 2'
+def test_instantiate_from_csv(sample_csv):
+    items = Item.instantiate_from_csv(sample_csv)
 
-    # Удалите временный файл после завершения теста
-    import os
-    os.remove('test_items.csv')
+    assert len(items) == 3, "Ожидалось получить три элемента из файла CSV"
 
+    # Проверка первого элемента с учетом пробелов
+    assert items[0].name.strip() == "Item1"
+    assert items[0].price == 10.5
+    assert items[0].quantity == 3
+
+    # Проверка второго элемента
+    assert items[1].name.strip() == "Item2"
+    assert items[1].price == 20.0
+    assert items[1].quantity == 5
+
+    # Проверка третьего элемента
+    assert items[2].name.strip() == "Item3"
+    assert items[2].price == 15.75
+    assert items[2].quantity == 2
 def test_string_to_number():
     assert Item.string_to_number('123') == 123
     assert Item.string_to_number('12.34') == 12.34
     with pytest.raises(ValueError):
         Item.string_to_number('abc')
+
+def test_item_rept_and_str():
+    item1 = Item("Смартфон", 10000, 20)
+    assert repr(item1) == "Item('Смартфон', 10000, 20)"
+    assert str(item1) == 'Смартфон'
