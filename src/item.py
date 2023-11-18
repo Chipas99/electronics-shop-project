@@ -1,12 +1,15 @@
 import csv
 import os.path
 
+from src.csverror import InstantiateCSVError
+
 class Item:
     """
     Класс для представления товара в магазине.
     """
     discount_rate = 1.0
     all = []
+    PATH_NAME = 'src/items.csv'
 
     def __init__(self, name: str, price: float, quantity: int) -> None:
         """
@@ -72,18 +75,44 @@ class Item:
         cls.discount_rate = discount_rate
 
     @classmethod
-    def instantiate_from_csv(cls, filename):
+    def instantiate_from_csv(cls, path_name=PATH_NAME):
+        """
+        Создаёт объекты из данных файла .csv
+        """
+
         items = []
-        with open(filename, 'r', encoding='cp1251') as csvfile:
-            csv_reader = csv.reader(csvfile)
-            next(csv_reader)
-            for row in csv_reader:
-                name = row[0]
-                price = float(row[1])
-                quantity = int(row[2])
-                item = cls(name=name, price=price, quantity=quantity)
-                items.append(item)
-        return items
+        path_name = str(cls.path_file(path_name))
+
+        try:
+            with open(path_name, newline='', encoding='windows-1251') as csv_f:
+                reader = csv.DictReader(csv_f)
+                if reader.fieldnames != ['name', 'price', 'quantity']:
+                    raise InstantiateCSVError
+                for row in reader:
+                    name = str(row['name'])
+                    price = float(row['price'])
+                    quantity = int(row['quantity'])
+                    item = cls(name, price, quantity)
+                    items.append(item)
+                cls.all.extend(items)
+        except FileNotFoundError:
+            err_text = 'FileNotFoundError: Отсутствует файл item.csv'
+            print(err_text)
+            return err_text
+        except InstantiateCSVError as err:
+            print(err)
+            return err
+
+    @staticmethod
+    def path_file(path_name):
+        """
+        Создаёт путь для файла при условии, что файл лежит в другой папке родительского каталога
+
+        :param path_name: путь к файлу в подобном формате 'src/items.csv'
+        """
+        path_list = path_name.split('/')
+        path_file = os.path.join('..', path_list[0], path_list[1])
+        return path_file
 
     @staticmethod
     def string_to_number(value: str) -> float:
